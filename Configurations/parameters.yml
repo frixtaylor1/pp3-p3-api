@@ -1,0 +1,11 @@
+server:
+  sv_allow_origins: *
+  sv_allow_methods: GET, POST, PUT, DELETE
+  sv_allow_headers: content-type
+  sv_content_type: application/json
+database:
+  db_host: localhost
+  db_port: 9001
+  db_user: dev
+  db_password: 123456
+  db_name: isft
