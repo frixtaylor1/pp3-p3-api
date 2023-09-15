@@ -4,7 +4,7 @@ server:
   sv_allow_headers: content-type
   sv_content_type: application/json
 database:
-  db_host: localhost
+  db_host: 127.0.0.1
   db_port: 9001
   db_user: dev
   db_password: 123456
