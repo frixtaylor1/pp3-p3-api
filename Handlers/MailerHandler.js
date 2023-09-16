@@ -35,12 +35,26 @@ class ISFT151Mailer
 };
 
 /* data structure for send mails
+
     let mailOptions = 
     {
-        from: 'alexandrine.hilpert@ethereal.email',
-        to: 'jessyca.armstrong@ethereal.email',
+        from: 'sofia.dubuque@ethereal.email',
+        to: 'jevon.kautzer@ethereal.email',
         subject: 'Test MailerController',
-        text: 'Prueba de envio por fuera'
+        text: 'Prueba de envio por fuera',
+        attachments: //an object for each files to be send 
+        [
+            {
+                filename: 'FichaMedica.pdf',
+                path: 'C:/Users/PC/Downloads/ficha_medica.pdf',
+                contentType: 'application/pdf'
+            },
+            {
+                filename: 'image.pdf',
+                path: 'C:/Users/PC/Downloads/Image_PD.pdf',
+                contentType: 'application/pdf'
+            }
+        ],
     }
 */
 module.exports = { ISFT151Mailer }
