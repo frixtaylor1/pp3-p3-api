@@ -7,6 +7,12 @@ class PDFHandler
     this.format = "A4";
     this.path = "./testPDF.pdf";
   }
+
+    /**
+     *  Genera un archivo PDF a partir de contenido HTML...
+     * 
+     * @param string htmlContent       
+    **/
   async generatePDF(htmlContent)
   {
     const browser = await puppeteer.launch();

@@ -1,11 +1,10 @@
 var nodemailer = require('nodemailer');
 
-//https://ethereal.email/create para crear mails aleatorios
-
-//SMTP: es un protocolo TCP/IP que se utiliza para enviar y recibir correo electrónico.
-
-//Para gmail se necesita verificación de 2 pasos y luego crear contraseña para aplicaciones
-
+/** información para pruebas de mail:
+     *  https://ethereal.email/create para crear mails aleatorios
+     * //SMTP: es un protocolo TCP/IP que se utiliza para enviar y recibir correo electrónico.
+     * //Para gmail se necesita verificación de 2 pasos y luego crear contraseña para aplicaciones
+**/
 class ISFT151Mailer
 {
     constructor()
@@ -18,11 +17,30 @@ class ISFT151Mailer
         secure: false, // true for 465, false for other ports
         auth: 
         {
-            user: 'alexandrine.hilpert@ethereal.email',
-            pass: '65BwfE99yh59q1r3BF'
+            user: 'filomena92@ethereal.email',
+            pass: 'gj8agmqWjkdeS3VV9q'
         }
         });
     }
+
+    /**
+     *  Envia un mail...
+     * 
+     * @param object mailOptions 
+     * from: 'ISFT151.@ethereal.email',
+     * to: 'STUDENT@ethereal.email',
+     * subject: 'something',
+     * text: 'something',
+     * attachments:
+     * [
+     * {
+     *      filename: 'file.pdf',
+     *      path: 'path/file.pdf',
+     *      contentType: 'application/pdf'
+     * }
+     * ]        
+     * @return messageId
+     **/
     async sendEmail(mailOptions)
     {
         const response = await this.transporter.sendMail(mailOptions)
@@ -33,28 +51,4 @@ class ISFT151Mailer
         return response.messageId;
     }
 };
-
-/* data structure for send mails
-
-    let mailOptions = 
-    {
-        from: 'sofia.dubuque@ethereal.email',
-        to: 'jevon.kautzer@ethereal.email',
-        subject: 'Test MailerController',
-        text: 'Prueba de envio por fuera',
-        attachments: //an object for each files to be send 
-        [
-            {
-                filename: 'FichaMedica.pdf',
-                path: 'C:/Users/PC/Downloads/ficha_medica.pdf',
-                contentType: 'application/pdf'
-            },
-            {
-                filename: 'image.pdf',
-                path: 'C:/Users/PC/Downloads/Image_PD.pdf',
-                contentType: 'application/pdf'
-            }
-        ],
-    }
-*/
 module.exports = { ISFT151Mailer }
