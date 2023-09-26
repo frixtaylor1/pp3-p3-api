@@ -11,20 +11,9 @@ class MajorHandler {
      **/
     async create(data) {
         let results = {};
-
-        try {
-            await this.dbHandler.connect();
-
-            results = await this.dbHandler.executeStoreProcedure('usp_create_major', data);
         
-        } catch (error) {
-            results = error;
-            console.error(error);
+        results = await this.dbHandler.executeStoreProcedure('usp_create_major', data);
         
-        } finally {
-            await this.dbHandler.close();
-        }
-
         return results;
     }
 
@@ -37,18 +26,7 @@ class MajorHandler {
     async remove(data) {
         let results = {};
 
-        try {
-            await this.dbHandler.connect();
-
-            results = await this.dbHandler.executeStoreProcedure('usp_remove_major', data);
-
-        } catch (error) {
-            results = error;
-            console.error(error);
-        
-        } finally {
-            await this.dbHandler.close();
-        }
+        results = await this.dbHandler.executeStoreProcedure('usp_remove_major', data);
 
         return results;
     }
@@ -62,18 +40,7 @@ class MajorHandler {
     async read(data) {
         let results = {};
 
-        try {
-            await this.dbHandler.connect();
-
-            results = await this.dbHandler.executeStoreProcedure('usp_read_major', data);
-
-        } catch (error) {
-            results = error;
-            console.error(error);
-        
-        } finally {
-            await this.dbHandler.close();
-        }
+        results = await this.dbHandler.executeStoreProcedure('usp_read_major', data);
 
         return results;
     }
@@ -87,17 +54,7 @@ class MajorHandler {
     async update(data) {
         let results = {};
 
-        try {
-            await this.dbHandler.connect();
-
-            results = await this.dbHandler.executeStoreProcedure('usp_update_major', data);
-
-        } catch (error) {
-            results = error;
-        
-        } finally {
-            await this.dbHandler.close();
-        }
+        results = await this.dbHandler.executeStoreProcedure('usp_update_major', data);
 
         return results;
     }
