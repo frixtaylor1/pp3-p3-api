@@ -81,17 +81,3 @@ class StateMachine {
 }
 
 
-/* 
-  Su utilizacion... 
-  
-  const fsm = new StateMachine();
-
-  fsm.addState("Preinscripción en Espera");
-  fsm.addState("Pre-inscripto");
-
-  fsm.addTransition("Preinscripción en Espera", "Pre-inscripto");
-
-  fsm.changeState("Preinscripción en Espera");
-
-  fsm.showTransitions();
-*/
