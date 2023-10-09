@@ -9,3 +9,10 @@ database:
   db_user: dev
   db_password: 123456
   db_name: isft
+states-machine:
+  preinscription_on_proc: PRE-PROC
+  preinscription: PRE-I
+  preinscription_in_list: PRE-LIST
+  inscript: INSCR
+  annulled: ANLD
+  annulled_inscript: ANLD-I
