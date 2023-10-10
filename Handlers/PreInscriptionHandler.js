@@ -63,7 +63,59 @@ class PreInscriptionHandler {
     return results;
   }
 
-  
+  /**
+   * @brief Inicia el proceso de inscripcion...
+   * 
+   * @apicall /startPreinscription
+   * @method  HTTP:POST 
+   * 
+   * @param   object data // name, surname, dni, mail, birthdate, age
+   * @return  object
+   **/
+  async startPreinscription(data)
+  {
+    let results = {};
+
+    results = await this.dbHandler.executeStoreProcedure('usp_start_preinscription', data);
+
+    return results;
+  }
+
+  /**
+   * @brief Confirma la Preinscripcion...
+   * 
+   * @apicall /confirmPreinscription
+   * @method  HTTP:POST 
+   * 
+   * @param   object data // idpreinscription
+   * @return  object
+   **/
+  async confirmPreinscription(data)
+  {
+    let results = {};
+
+    results = await this.dbHandler.executeStoreProcedure('usp_confirm_preinscription', data);
+
+    return results;
+  }
+
+  /**
+   * @brief Cancela una Preinscripcion...
+   * 
+   * @apicall /cancelPreinscription
+   * @method  HTTP:POST 
+   * 
+   * @param   object data // idpreinscription
+   * @return  object
+   **/
+  async cancelPreinscription(data)
+  {
+    let results = {};
+
+    results = await this.dbHandler.executeStoreProcedure('usp_cancel_preinscription', data);
+
+    return results;
+  }
 }
 
 module.exports = { PreInscriptionHandler };
