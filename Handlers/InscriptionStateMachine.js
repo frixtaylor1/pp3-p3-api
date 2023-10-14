@@ -9,7 +9,7 @@ class StateMachine {
    * 
    * @param string name 
    * 
-   * @return void
+   * @returns void
    **/
   addState(name) {
     if (!this.states[name]) {
@@ -25,7 +25,7 @@ class StateMachine {
    * @param string fromState
    * @param string toState 
    * 
-   * @return void
+   * @returns void
    **/
   addTransition(fromState, toState) {
     if (!this.states[fromState] || !this.states[toState]) {
@@ -43,8 +43,9 @@ class StateMachine {
    * 
    * @param string newState
    * 
-   * @return void
+   * @returns void
    **/
+
   changeState(newState) {
     if (!this.states[newState]) {
       console.error("El estado no existe.");
@@ -60,7 +61,7 @@ class StateMachine {
    * 
    * @param void
    * 
-   * @return void
+   * @returns void
    **/
   showTransitions() {
     if (!this.currentState) {
