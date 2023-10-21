@@ -81,4 +81,4 @@ class StateMachine {
   }
 }
 
-
+module.exports = { StateMachine };
