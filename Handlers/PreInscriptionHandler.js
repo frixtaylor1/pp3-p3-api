@@ -1,12 +1,51 @@
 const { UserHandler }       = require('./UserHandler.js');
 const { MajorHandler }      = require('./MajorHandler.js');
 const { dataBaseHandler }   = require('./DataBaseHandler.js');
+const { StateMachine }      = require('./StateMachine.js');
 /**
  * @todo Integrar la finit state machine en el preinscription handler...
  */
-class PreInscriptionHandler {
-  constructor(dbHandler) {
+class PreInscriptionHandler 
+{
+  constructor(dbHandler,fms = new StateMachine()) 
+  {
     this.dbHandler = dbHandler;
+    this.fms = fms;
+
+    //states
+      this.fsm.addState("VOID");
+      this.fsm.addState("PRE-PROC");
+      this.fsm.addState("PRE-I");
+      this.fsm.addState("PRE-LIST");
+      this.fsm.addState("INSCR");
+      this.fsm.addState("ANLD");
+      this.fsm.addState("ANLD-I");
+
+      this.addTransition('VOID','PRE-PROC');
+
+      this.addTransition('PRE-PROC','PRE-I');
+      this.addTransition('PRE-PROC','PRE-LIST');
+      this.addTransition('PRE-PROC','ANLD');
+
+      this.addTransition('PRE-I','INSCR');
+      this.addTransition('PRE-I','PRE-LIST');
+      this.addTransition('PRE-I','ANLD');
+
+      this.addTransition('PRE-LIST','INSCR');
+      this.addTransition('PRE-LIST','ANLD');
+
+      this.addTransition('INSCR','PRE-LIST');
+      this.addTransition('INSCR','ANLD');
+      this.addTransition('INSCR','ANLD-I');
+
+      this.addTransition('ANLD','PRE-PROC');
+      this.addTransition('ANLD','PRE-I');
+      this.addTransition('ANLD','PRE-LIST');
+      this.addTransition('ANLD','INSCR');
+
+      this.addTransition('ANLD-I','INSCR');
+
+
   }
 
   /**

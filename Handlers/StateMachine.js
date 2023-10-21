@@ -111,6 +111,7 @@ class StateMachine
   }
 }
 
+module.exports = { StateMachine };
 
   //UTILIZACIÓN DE LA FINIT STATE MACHINE...
 
@@ -126,6 +127,6 @@ class StateMachine
   fsm.addTransition("PRE-I", "INSCR");
   fsm.addTransition("PRE-LIST", "INSCR");
 
-  fsm.changeState("PRE-I");
+  fsm.changeState("PI-PROC");
 
   fsm.showTransitions();
