@@ -55,7 +55,7 @@ class UserHandler
     async update(userData)
     {
         let results = {};
-        results = await this.dbHandler.executeStoreProcedure('usp_update_user',userData);
+        results = await this.dbHandler.executeStoreProcedure('usp_update_user', userData);
 
         return results;
     }

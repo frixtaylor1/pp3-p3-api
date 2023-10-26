@@ -1,5 +1,7 @@
-class StateMachine {
-  constructor() {
+class StateMachine 
+{
+  constructor() 
+  {
     this.states       = {}; 
     this.currentState = null;
   }
@@ -7,12 +9,14 @@ class StateMachine {
   /**
    * @brief Agrega un estado...
    * 
-   * @param string name 
+   * @param {string} name 
    * 
-   * @returns void
+   * @returns {void}
    **/
-  addState(name) {
-    if (!this.states[name]) {
+  addState(name) 
+  {
+    if (!this.states[name]) 
+    {
       this.states[name] = {
         transitions: {},
       };
@@ -22,18 +26,21 @@ class StateMachine {
   /**
    * @brief Agregar una transición entre dos estados
    * 
-   * @param string fromState
-   * @param string toState 
+   * @param {string} fromState
+   * @param {string} toState 
    * 
-   * @returns void
+   * @returns {void}
    **/
-  addTransition(fromState, toState) {
-    if (!this.states[fromState] || !this.states[toState]) {
+  addTransition(fromState, toState) 
+  {
+    if (!this.states[fromState] || !this.states[toState]) 
+    {
       console.error("Los estados no existen.");
       return;
     }
 
-    if (!this.states[fromState].transitions[toState]) {
+    if (!this.states[fromState].transitions[toState]) 
+    {
       this.states[fromState].transitions[toState] = [];
     }
   }
@@ -41,13 +48,15 @@ class StateMachine {
   /**
    * @brief  Cambiar al estado especificado
    * 
-   * @param string newState
+   * @param {string} newState
    * 
-   * @returns void
+   * @returns {void}
    **/
 
-  changeState(newState) {
-    if (!this.states[newState]) {
+  changeState(newState) 
+  {
+    if (!this.states[newState]) 
+    {
       console.error("El estado no existe.");
       return;
     }
@@ -59,25 +68,41 @@ class StateMachine {
   /**
    * @brief Muestra las transiciones desde el estado actual
    * 
-   * @param void
+   * @param {void}
    * 
-   * @returns void
+   * @returns {void}
    **/
-  showTransitions() {
-    if (!this.currentState) {
+  showTransitions() 
+  {
+    if (!this.currentState) 
+    {
       console.error("No hay un estado actual.");
       return;
     }
 
     const transitions = this.states[this.currentState].transitions;
-    if (Object.keys(transitions).length === 0) {
+    if (Object.keys(transitions).length === 0) 
+    {
       console.log("No hay transiciones desde este estado.");
-    } else {
+    } 
+    else 
+    {
       console.log(`Transiciones desde ${this.currentState}:`);
-      for (const nextState in transitions) {
+      for (const nextState in transitions) 
+      {
         console.log(`- Hacia ${nextState}`);
       }
     }
+  }
+
+  /**
+   * @brief Obtiene el estado actual
+   * 
+   * @returns {string} currentState
+   **/
+  getCurrentState() 
+  {
+    return this.currentState;
   }
 }
 
