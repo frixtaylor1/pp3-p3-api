@@ -13,7 +13,10 @@ USE `pp3_p3_db`;
 DELIMITER ;;
 
 DROP PROCEDURE IF EXISTS `usp_confirm_preinscription`;;
-;;
+CREATE PROCEDURE `usp_confirm_preinscription`(IN `p_id` int, IN `p_state` varchar(100))
+UPDATE preinscription 
+   SET preinscription.state = p_state
+WHERE preinscription.id = p_id;;
 
 DROP PROCEDURE IF EXISTS `usp_create_preinscription`;;
 CREATE PROCEDURE `usp_create_preinscription`(IN `p_id_user` int, IN `p_id_major` int, IN `p_preinscription_date` date, IN `p_state` varchar(100))
@@ -21,16 +24,34 @@ INSERT INTO preinscription (id_user, id_major, preinscription_date, state)
   VALUES (p_id_user, p_id_major, p_preinscription_date, p_state);;
 
 DROP PROCEDURE IF EXISTS `usp_create_user`;;
-;;
+CREATE PROCEDURE `usp_create_user`(IN `p_nickname` varchar(45), IN `p_password` varchar(45))
+INSERT INTO user(nickname, password, name, surname, dni, birthdate, email) 
+    VALUES (p_nickname, p_password, NULL, NULL, NULL, NULL, NULL);;
+
+DROP PROCEDURE IF EXISTS `usp_read_major`;;
+CREATE PROCEDURE `usp_read_major`(IN `p_id` int)
+SELECT * FROM major WHERE major.id = p_id;;
 
 DROP PROCEDURE IF EXISTS `usp_read_preinscription`;;
-;;
+CREATE PROCEDURE `usp_read_preinscription`(IN `p_id` int)
+SELECT * FROM preinscription WHERE preinscription.id = p_id;;
+
+DROP PROCEDURE IF EXISTS `usp_read_user_by_id`;;
+CREATE PROCEDURE `usp_read_user_by_id`(IN `p_id` int)
+SELECT * FROM user WHERE user.id = p_id;;
 
 DROP PROCEDURE IF EXISTS `usp_remove_preinscription`;;
 ;;
 
 DROP PROCEDURE IF EXISTS `usp_update_user`;;
-;;
+CREATE PROCEDURE `usp_update_user`(IN `p_id` int, IN `p_name` varchar(45), IN `p_surname` varchar(45), IN `p_dni` varchar(45), IN `p_birthdate` varchar(45), IN `p_email` varchar(100))
+UPDATE user 
+  SET user.name      = p_name, 
+      user.surname   = p_surname, 
+      user.dni       = p_dni, 
+      user.birthdate = p_birthdate,
+      user.email     = p_email
+WHERE user.id = p_id;;
 
 DELIMITER ;
 
@@ -61,7 +82,7 @@ CREATE TABLE `preinscription` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `preinscription` (`id`, `id_user`, `id_major`, `preinscription_date`, `state`) VALUES
-(1,	1,	1,	'2023-10-14',	'PRE-PROC');
+(1,	1,	1,	'2023-10-14',	'preinscript');
 
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE `user` (
@@ -77,6 +98,7 @@ CREATE TABLE `user` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 INSERT INTO `user` (`id`, `nickname`, `password`, `name`, `surname`, `dni`, `birthdate`, `email`) VALUES
-(1,	'dev',	'123456',	'kevin',	'taylor',	'40000000',	'1997-12-09',	'kevinmusic123@gmail.com');
+(1,	'dev',	'123456',	'Aldo',	'Capurro',	'123123123',	'1987-12-31',	'aldo@capurro.com'),
+(2,	'pepe',	'123456',	NULL,	NULL,	NULL,	NULL,	NULL);
 
--- 2023-10-14 17:32:14
+-- 2023-10-26 22:38:31
