@@ -1,51 +1,19 @@
 const { UserHandler }       = require('./UserHandler.js');
 const { MajorHandler }      = require('./MajorHandler.js');
 const { dataBaseHandler }   = require('./DataBaseHandler.js');
-const { StateMachine }      = require('./StateMachine.js');
+const fs                    = require('fs').promises;
+const { parseYAML }         = require('../Configurations/parseYAML.js');
+const { StateMachine }      = require('./StateMachine.js'); 
+
 /**
  * @todo Integrar la finit state machine en el preinscription handler...
  */
 class PreInscriptionHandler 
 {
-  constructor(dbHandler,fms = new StateMachine()) 
+  constructor(dbHandler) 
   {
-    this.dbHandler = dbHandler;
-    this.fms = fms;
-
-    //states
-      this.fsm.addState("VOID");
-      this.fsm.addState("PRE-PROC");
-      this.fsm.addState("PRE-I");
-      this.fsm.addState("PRE-LIST");
-      this.fsm.addState("INSCR");
-      this.fsm.addState("ANLD");
-      this.fsm.addState("ANLD-I");
-
-      this.addTransition('VOID','PRE-PROC');
-
-      this.addTransition('PRE-PROC','PRE-I');
-      this.addTransition('PRE-PROC','PRE-LIST');
-      this.addTransition('PRE-PROC','ANLD');
-
-      this.addTransition('PRE-I','INSCR');
-      this.addTransition('PRE-I','PRE-LIST');
-      this.addTransition('PRE-I','ANLD');
-
-      this.addTransition('PRE-LIST','INSCR');
-      this.addTransition('PRE-LIST','ANLD');
-
-      this.addTransition('INSCR','PRE-LIST');
-      this.addTransition('INSCR','ANLD');
-      this.addTransition('INSCR','ANLD-I');
-
-      this.addTransition('ANLD','PRE-PROC');
-      this.addTransition('ANLD','PRE-I');
-      this.addTransition('ANLD','PRE-LIST');
-      this.addTransition('ANLD','INSCR');
-
-      this.addTransition('ANLD-I','INSCR');
-
-
+    this.dbHandler  = dbHandler;
+    this.fsm        = new StateMachine();
   }
 
   /**
@@ -54,7 +22,8 @@ class PreInscriptionHandler
    * @param object data // iduser, idmajor
    * @return object
    **/
-  async create(data) {
+  async create(data) 
+  {
     let results = {};
 
     results = await this.dbHandler.executeStoreProcedure('usp_create_preinscription', data);
@@ -68,7 +37,8 @@ class PreInscriptionHandler
    * @param object data // idpreinscription
    * @return object
    **/
-  async remove(data) {
+  async remove(data) 
+  {
     let results = {};
 
     results = await this.dbHandler.executeStoreProcedure('usp_remove_preinscription', data);
@@ -82,7 +52,8 @@ class PreInscriptionHandler
    * @param object data // idpreinscription
    * @return object
    **/
-  async read(data) {
+  async read(data) 
+  {
     let results = {};
 
     results = await this.dbHandler.executeStoreProcedure('usp_read_preinscription', data);
@@ -96,7 +67,8 @@ class PreInscriptionHandler
    * @param object data // state
    * @return object
    **/
-  async update(data) {
+  async update(data) 
+  {
     let results = {};
 
     results = await this.dbHandler.executeStoreProcedure('usp_update_preinscription', data);
@@ -107,17 +79,41 @@ class PreInscriptionHandler
   /**
    * @brief Inicia el proceso de inscripcion...
    * 
-   * @apidoc /startPreinscription
+   * @apidoc `/startPreinscription`
    * @method  HTTP:POST 
    * 
-   * @param   object data // iduser, idmajor
+   * @param  {JSON} requestData
+   * @param  {Callable} responseCallback}
    * @return  object
    **/
-  async startPreinscription(data) {
+  async startPreinscription(requestData, responseCallback) 
+  {
+    const getCurrentDate = require('../Utils/Date.js');
     
     let results = {};
+    let data = requestData.data;
 
-    results = await this.create(data);
+    try {
+      await this.dbHandler.loadConfig();
+      await this.dbHandler.connect();
+      
+      let startPreinscription = {
+        id_user             : data.id_user,
+        id_major            : data.id_major,
+        preinscription_date : getCurrentDate('es-AR'),
+        state               : 'PRE-PROC',
+      };
+
+      results = await this.create(startPreinscription);
+
+      responseCallback(200, results[0]);
+
+      console.log('Hello, World!');
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      await this.dbHandler.close();
+    }
 
     return results;
   }
@@ -131,7 +127,8 @@ class PreInscriptionHandler
    * @param   object data // id_user, id_preinscription, name, surname, dni, birthdate, email
    * @return  object
    **/
-  async confirmPreinscription(data) {
+  async confirmPreinscription(data) 
+  {
     let results       = {};
     let userHandler   = new UserHandler(this.dbHandler);
     let majorHanlder  = new MajorHandler(this.dbHandler);
@@ -176,44 +173,63 @@ class PreInscriptionHandler
    * @param   object data // idpreinscription
    * @return  object
    **/
-  async cancelPreinscription(data) {
+  async cancelPreinscription(data) 
+  {
     let results = {};
 
     results = await this.dbHandler.executeStoreProcedure('usp_cancel_preinscription', data);
 
     return results;
   }
+
+  async __loadStateTransitions(configFilePath) 
+  {
+    let parameters;
+    try 
+    {
+      const yamlString  = await fs.readFile(configFilePath, 'utf8');
+      parameters        = await parseYAML(yamlString);
+
+    } catch (error) 
+    {
+      console.error('Error loading config:', error.message);
+    }
+
+    let states = parameters.states_machine.states;
+
+    console.log(states);
+
+    if (states) 
+    {
+      const parsedStates = states.split(', ').map(value => value.trim());
+        for (const state of parsedStates) {
+          this.fsm.addState(state);
+        }
+    }
+
+    let transitions = parameters.state_machine_transitions;
+
+    if (transitions) 
+    {
+      for (const state in transitions) {
+        if (transitions.hasOwnProperty(state)) {
+          const values = transitions[state].split(', ').map(value => value.trim());
+          for (const transition of values) {
+            this.fsm.addTransition(state, transition);
+          }
+        }
+      }
+    }
+  }
 }
 
-(async () => {
-  const getCurrentDate = require('../Utils/Date.js');
-  
-  try {
-    // Load the database configuration before connecting.
-    const preinscriptionHandler = new PreInscriptionHandler(
-      dataBaseHandler
-    );
+let preinscriptionHanlder = new PreInscriptionHandler();
 
-    await dataBaseHandler.loadConfig();
-    await dataBaseHandler.connect();
-    
-    let startPreinscription = {
-      id_user             : 1,
-      id_major            : 1,
-      preinscription_date : getCurrentDate('es-AR'),
-      state               : 'PRE-PROC',
-    };
+preinscriptionHanlder.__loadStateTransitions('../Configurations/parameters.yml');
 
-    preinscriptionHandler.startPreinscription(startPreinscription).then((response) => {
-      console.log(response);
-    });
-
-    console.log('Hello, World!');
-  } catch (error) {
-    console.error('Error:', error);
-  } finally {
-    await dataBaseHandler.close();
-  }
-})();
+setTimeout(() => {
+  preinscriptionHanlder.fsm.changeState('void');
+  preinscriptionHanlder.fsm.showTransitions();
+}, 1000);
 
 module.exports = { PreInscriptionHandler };

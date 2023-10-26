@@ -1,25 +1,7 @@
-const fs = require('fs').promises;
-const parseYAML = require('../Configurations/ParseYAML.js');
-
-class StateMachine 
-{
-  constructor() 
-  {
+class StateMachine {
+  constructor() {
     this.states       = {}; 
     this.currentState = null;
-    this.configData = {};
-    this.configFilePath = '../Configurations/parameters.yml';
-  }
-  async loadConfig() 
-  {
-    try 
-    {
-      const yamlString = await fs.readFile(this.configFilePath, 'utf8');
-      this.configData  = await parseYAML(yamlString);
-    } catch (error) 
-    {
-      console.error('Error loading config:', error.message);
-    }
   }
 
   /**
@@ -27,14 +9,11 @@ class StateMachine
    * 
    * @param string name 
    * 
-   * @return void
+   * @returns void
    **/
-  addState(name) 
-  {
-    if (!this.states[name]) 
-    {
-      this.states[name] = 
-      {
+  addState(name) {
+    if (!this.states[name]) {
+      this.states[name] = {
         transitions: {},
       };
     }
@@ -46,19 +25,16 @@ class StateMachine
    * @param string fromState
    * @param string toState 
    * 
-   * @return void
+   * @returns void
    **/
-  addTransition(fromState, toState) 
-  {
-    if (!this.states[fromState] || !this.states[toState]) 
-    {
+  addTransition(fromState, toState) {
+    if (!this.states[fromState] || !this.states[toState]) {
       console.error("Los estados no existen.");
       return;
     }
-    if (!this.states[fromState].transitions[toState]) 
-    {
+
+    if (!this.states[fromState].transitions[toState]) {
       this.states[fromState].transitions[toState] = [];
-      console.log(this.states)
     }
   }
 
@@ -67,12 +43,11 @@ class StateMachine
    * 
    * @param string newState
    * 
-   * @return void
+   * @returns void
    **/
-  changeState(newState) 
-  {
-    if (!this.states[newState]) 
-    {
+
+  changeState(newState) {
+    if (!this.states[newState]) {
       console.error("El estado no existe.");
       return;
     }
@@ -86,25 +61,20 @@ class StateMachine
    * 
    * @param void
    * 
-   * @return void
+   * @returns void
    **/
-  showTransitions() 
-  {
-    if (!this.currentState) 
-    {
+  showTransitions() {
+    if (!this.currentState) {
       console.error("No hay un estado actual.");
       return;
     }
 
     const transitions = this.states[this.currentState].transitions;
-    if (Object.keys(transitions).length === 0) 
-    {
+    if (Object.keys(transitions).length === 0) {
       console.log("No hay transiciones desde este estado.");
-    } else 
-    {
+    } else {
       console.log(`Transiciones desde ${this.currentState}:`);
-      for (const nextState in transitions) 
-      {
+      for (const nextState in transitions) {
         console.log(`- Hacia ${nextState}`);
       }
     }
@@ -112,21 +82,3 @@ class StateMachine
 }
 
 module.exports = { StateMachine };
-
-  //UTILIZACIÓN DE LA FINIT STATE MACHINE...
-
-  const fsm = new StateMachine();
-
-  fsm.addState("PI-PROC");
-  fsm.addState("PRE-I");
-  fsm.addState("PRE-LIST");
-  fsm.addState("INSCR");
-
-  fsm.addTransition("PI-PROC", "PRE-I");
-  fsm.addTransition("PRE-I", "PRE-LIST");
-  fsm.addTransition("PRE-I", "INSCR");
-  fsm.addTransition("PRE-LIST", "INSCR");
-
-  fsm.changeState("PI-PROC");
-
-  fsm.showTransitions();

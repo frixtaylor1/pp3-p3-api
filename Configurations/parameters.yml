@@ -8,12 +8,12 @@ database:
   db_port: 3306
   db_user: dev
   db_password: 123456
-  db_name: isft
-states-machine:
-  void: VOID
-  preinscription_on_proc: PRE-PROC
-  preinscription: PRE-I
-  preinscription_in_list: PRE-LIST
-  inscript: INSCR
-  annulled: ANLD
-  annulled_inscript: ANLD-I
+  db_name: pp3_p3_db
+states_machine: 
+  states: void, preinscription_on_proc, preinscription, preinscription_in_list, inscript, annulled, annulled_inscript
+state_machine_transitions:
+  void: preinscription_on_proc
+  preinscription_on_proc: preinscription, preinscription_in_list, annulled
+  preinscription: inscript, preinscription_in_list, annulled
+  preinscription_in_list: inscript, annulled
+  inscript: preinscription_in_list, annulled, annulled_inscript
