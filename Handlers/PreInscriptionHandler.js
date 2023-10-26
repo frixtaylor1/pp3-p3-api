@@ -1,9 +1,9 @@
 const { UserHandler }       = require('./UserHandler.js');
 const { MajorHandler }      = require('./MajorHandler.js');
 const { dataBaseHandler }   = require('./DataBaseHandler.js');
-const fs                    = require('fs').promises;
 const { parseYAML }         = require('../Configurations/parseYAML.js');
 const { StateMachine }      = require('./StateMachine.js'); 
+const fs                    = require('fs').promises;
 
 /**
  * @todo Integrar la finit state machine en el preinscription handler...
@@ -12,8 +12,9 @@ class PreInscriptionHandler
 {
   constructor(dbHandler) 
   {
-    this.dbHandler  = dbHandler;
-    this.fsm        = new StateMachine();
+    this.dbHandler        = dbHandler;
+    this.fsm              = new StateMachine();
+    this.nbPreinscription = 0;
   }
 
   /**
@@ -97,11 +98,13 @@ class PreInscriptionHandler
       await this.dbHandler.loadConfig();
       await this.dbHandler.connect();
       
+      this.fsm.changeState('preinscription_on_proc');
+
       let startPreinscription = {
         id_user             : data.id_user,
         id_major            : data.id_major,
         preinscription_date : getCurrentDate('es-AR'),
-        state               : 'PRE-PROC',
+        state               : this.fsm.getCurrentState(),
       };
 
       results = await this.create(startPreinscription);
@@ -143,24 +146,37 @@ class PreInscriptionHandler
       email     : data.email,
     };
 
+    await this.dbHandler.loadConfig();
+    await this.dbHandler.connect();
+
     results[0] = await userHandler.update(userData);
 
     let preinscriptionObj = {
-      id_preinsciption: data.id_preinsciption,
+      id_preinsciption: data.id_preinscription,
       state: undefined
     };
-
+    let majorData = {};
     let preInscriptionHandler  = new PreInscriptionHandler(this.dbHandler);
-    let preinscriptionData     = await preInscriptionHandler.read(data.id_preinsciption);
-    let majorData              = await majorHanlder.read(preinscriptionData.id_major);
-
-    if (capacity > majorData.capacity) {
-      preinscriptionObj.state = 'PRE-LIS-ESP';
-    } else {
-      preinscriptionObj.state = 'PRE-INS';
+    
+    preInscriptionHandler.read({id_preinsciption: preinscriptionObj.id_preinsciption}).then(res => {
+      majorData = majorHanlder.read({id_major: res[0][0].id_major});
+    });
+ 
+    this.nbPreinscription++;
+ 
+    if (this.nbPreinscription >= majorData.capacity) 
+    {
+      this.fsm.changeState('preinscription_in_list');
+      preinscriptionObj.state = this.fsm.getCurrentState();
+    } 
+    else 
+    {
+      this.fsm.changeState('preinscript');
+      preinscriptionObj.state = this.fsm.getCurrentState();
     }
     results[1] = await this.dbHandler.executeStoreProcedure('usp_confirm_preinscription', preinscriptionObj);
-
+    
+    await this.dbHandler.close();
     return results;
   }
 
@@ -223,7 +239,7 @@ class PreInscriptionHandler
   }
 }
 
-let preinscriptionHanlder = new PreInscriptionHandler();
+let preinscriptionHanlder = new PreInscriptionHandler(dataBaseHandler);
 
 preinscriptionHanlder.__loadStateTransitions('../Configurations/parameters.yml');
 
@@ -231,5 +247,19 @@ setTimeout(() => {
   preinscriptionHanlder.fsm.changeState('void');
   preinscriptionHanlder.fsm.showTransitions();
 }, 1000);
+
+//  id_user, id_preinscription, name, surname, dni, birthdate, email
+let preinscriptionData = {
+  id_user: 1,
+  id_preinscription: 1,
+  name: 'Aldo',
+  surname: 'Capurro',
+  dni: '123123123',
+  birthdate: '1987/12/31',
+  email: 'aldo@capurro.com', 
+};
+preinscriptionHanlder.confirmPreinscription(preinscriptionData).then(res => {
+  console.log(res);
+});
 
 module.exports = { PreInscriptionHandler };

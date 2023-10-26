@@ -15,6 +15,7 @@ class DataBaseHandler {
       const yamlString  = await fs.readFile(this.configFilePath, 'utf8');
       this.configData   = await parseYAML(yamlString);
       
+      console.log(this.configData.database);
     } catch (error) {
       console.error('Error loading config:', error.message);
     }
