@@ -193,7 +193,14 @@ class PreInscriptionHandler
   {
     let results = {};
 
-    results = await this.dbHandler.executeStoreProcedure('usp_cancel_preinscription', data);
+    await this.dbHandler.loadConfig();
+    await this.dbHandler.connect();
+
+    this.fsm.changeState('annulled');
+    data.preinscriprionState = this.fsm.getCurrentState();
+    results[1] = await this.dbHandler.executeStoreProcedure('usp_cancel_preinscription', data);
+
+    await this.dbHandler.close();
 
     return results;
   }
@@ -203,14 +210,18 @@ class PreInscriptionHandler
     let parameters;
     try 
     {
+      console.log('configFilePath>>> ' + configFilePath )
+
       const yamlString  = await fs.readFile(configFilePath, 'utf8');
+      console.log('yamlString>>> ' + yamlString )
+
       parameters        = await parseYAML(yamlString);
 
     } catch (error) 
     {
       console.error('Error loading config:', error.message);
     }
-
+    console.log('parameters>>> ' + parameters )
     let states = parameters.states_machine.states;
 
     console.log(states);
@@ -241,7 +252,7 @@ class PreInscriptionHandler
 
 let preinscriptionHanlder = new PreInscriptionHandler(dataBaseHandler);
 
-preinscriptionHanlder.__loadStateTransitions('../Configurations/parameters.yml');
+preinscriptionHanlder.__loadStateTransitions('./Configurations/parameters.yml');
 
 setTimeout(() => {
   preinscriptionHanlder.fsm.changeState('void');
@@ -261,5 +272,8 @@ let preinscriptionData = {
 preinscriptionHanlder.confirmPreinscription(preinscriptionData).then(res => {
   console.log(res);
 });
+// preinscriptionHanlder.cancelPreinscription({user_id: 1,id_major: 1,preinscriptionState: undefined}).then(res => {
+//   console.log(res);
+// });
 
 module.exports = { PreInscriptionHandler };
