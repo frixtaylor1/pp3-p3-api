@@ -1,25 +1,13 @@
 const { Server } = require('./Server/Server.js');
+const routes = require('./Routes/routes.js');
 
-function start_api() {  
+function start_api() 
+{  
   const api = new Server();
 
-  /**
-   * @API_TEST Prueba para la api...
-   */
-  api.get('/greet', greet);
-
-  /**
-   * @API_METHODS   
-   */ 
-  api.post('/startPreInscription', )
-
-
+  routes(api);
 
   api.start(3000);
-}
-
-function greet(req, responseCallback) {
-  responseCallback(200, { 'message': 'Hello, World!' });
 }
 
 module.exports = { start_api };

@@ -84,8 +84,8 @@ class PreInscriptionHandler
    * @method  HTTP:POST 
    * 
    * @param  {JSON} requestData
-   * @param  {Callable} responseCallback}
-   * @return  object
+   * @param  {Callable} responseCallback
+   * @return  {JSON}
    **/
   async startPreinscription(requestData, responseCallback) 
   {
@@ -94,7 +94,8 @@ class PreInscriptionHandler
     let results = {};
     let data = requestData.data;
 
-    try {
+    try 
+    {
       await this.dbHandler.loadConfig();
       await this.dbHandler.connect();
       
@@ -112,9 +113,13 @@ class PreInscriptionHandler
       responseCallback(200, results[0]);
 
       console.log('Hello, World!');
-    } catch (error) {
+    } 
+    catch (error) 
+    {
       console.error('Error:', error);
-    } finally {
+    } 
+    finally 
+    {
       await this.dbHandler.close();
     }
 
@@ -261,13 +266,13 @@ setTimeout(() => {
 
 //  id_user, id_preinscription, name, surname, dni, birthdate, email
 let preinscriptionData = {
-  id_user: 1,
-  id_preinscription: 1,
-  name: 'Aldo',
-  surname: 'Capurro',
-  dni: '123123123',
-  birthdate: '1987/12/31',
-  email: 'aldo@capurro.com', 
+  id_user           : 1,
+  id_preinscription : 1,
+  name              : 'Aldo',
+  surname           : 'Capurro',
+  dni               : '123123123',
+  birthdate         : '1987/12/31',
+  email             : 'aldo@capurro.com', 
 };
 preinscriptionHanlder.confirmPreinscription(preinscriptionData).then(res => {
   console.log(res);
