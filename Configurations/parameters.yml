@@ -4,10 +4,10 @@ server:
   sv_allow_headers: content-type
   sv_content_type: application/json
 database:
-  db_host: 127.0.0.1
-  db_port: 80
+  db_host: db
+  db_port: 3306
   db_user: root
-  db_password: rooty
+  db_password: 123456
   db_name: pp3_p3_db
 states_machine: 
   states: void, preinscription_on_proc, preinscript, preinscription_in_list, inscript, annulled, annulled_inscript

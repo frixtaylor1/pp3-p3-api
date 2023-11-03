@@ -3,6 +3,7 @@ const { MajorHandler }      = require('./MajorHandler.js');
 const { dataBaseHandler }   = require('./DataBaseHandler.js');
 const { parseYAML }         = require('../Configurations/parseYAML.js');
 const { StateMachine }      = require('./StateMachine.js'); 
+const { ISFT151Mailer }      = require('./MailerHandler.js'); 
 const fs                    = require('fs').promises;
 
 /**
@@ -10,11 +11,12 @@ const fs                    = require('fs').promises;
  */
 class PreInscriptionHandler 
 {
-  constructor(dbHandler) 
+  constructor(dbHandler,mailer = new ISFT151Mailer()) 
   {
     this.dbHandler        = dbHandler;
     this.fsm              = new StateMachine();
     this.nbPreinscription = 0;
+    this.mailer           = mailer;
   }
 
   /**
@@ -173,13 +175,46 @@ class PreInscriptionHandler
     {
       this.fsm.changeState('preinscription_in_list');
       preinscriptionObj.state = this.fsm.getCurrentState();
+
+ 
+      let mailOptions =
+      { 
+        from: 'sofia.dubuque@ethereal.email',
+        to: 'jevon.kautzer@ethereal.email',
+        subject: 'Preinscipción en lista de espera',
+        text: 'Tu preinscipción esta en lista de espera,nos comunicaremos contigo cuando se haya liberado lugar',
+        attachments: //an object for each files to be send 
+          [
+            {
+              filename: 'api-specification.pdf',
+              path: '../MailResources/api-specification.pdf',
+              contentType: 'application/pdf'
+            }
+          ],
+      }
     } 
     else 
     {
       this.fsm.changeState('preinscript');
       preinscriptionObj.state = this.fsm.getCurrentState();
+
+      let mailOptions =
+      { 
+        from: 'sofia.dubuque@ethereal.email',
+        to: 'jevon.kautzer@ethereal.email',
+        subject: 'Preinscipción aprobada',
+        text: 'Tu preinscipción ha sido aprobada',
+        attachments: //an object for each files to be send 
+          [
+            {
+              filename: 'api-specification.pdf',
+              path: '../MailResources/api-specification.pdf',
+              contentType: 'application/pdf'
+            }
+          ],
+      }
     }
-    results[1] = await this.dbHandler.executeStoreProcedure('usp_confirm_preinscription', preinscriptionObj);
+    results[1] = await this.dbHandler.executeStoreProcedure('usp_change_state_preinscription', preinscriptionObj);
     
     await this.dbHandler.close();
     return results;
@@ -194,7 +229,7 @@ class PreInscriptionHandler
    * @param   object data // idpreinscription
    * @return  object
    **/
-  async cancelPreinscription(data) 
+  async cancelPreinscription(data)
   {
     let results = {};
 
@@ -203,9 +238,25 @@ class PreInscriptionHandler
 
     this.fsm.changeState('annulled');
     data.preinscriprionState = this.fsm.getCurrentState();
-    results[1] = await this.dbHandler.executeStoreProcedure('usp_cancel_preinscription', data);
+    results[1] = await this.dbHandler.executeStoreProcedure('usp_change_state_preinscription', data);
 
     await this.dbHandler.close();
+
+    let mailOptions =
+    { 
+      from: 'sofia.dubuque@ethereal.email',
+      to: 'jevon.kautzer@ethereal.email',
+      subject: 'Preinscipción cancelada',
+      text: 'Tu preinscipción ha sido cancelada',
+      attachments: //an object for each files to be send 
+        [
+          {
+            filename: 'api-specification.pdf',
+            path: '../MailResources/api-specification.pdf',
+            contentType: 'application/pdf'
+          }
+        ],
+    }
 
     return results;
   }

@@ -6,24 +6,24 @@ var nodemailer = require('nodemailer');
 
 //Para gmail se necesita verificación de 2 pasos y luego crear contraseña para aplicaciones
 
-class ISFT151Mailer
+class ISFT151Mailer 
 {
-    constructor()
+    constructor() 
     {
         //data configuration 
         this.transporter = nodemailer.createTransport
-        ({
-        host: "smtp.ethereal.email",//type of mail smtp.xxx.xxx
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: 
-        {
-            user: 'alexandrine.hilpert@ethereal.email',
-            pass: '65BwfE99yh59q1r3BF'
-        }
-        });
+            ({
+                host: "smtp.ethereal.email",//type of mail smtp.xxx.xxx
+                port: 587,
+                secure: false, // true for 465, false for other ports
+                auth:
+                {
+                    user: 'thurman.mertz@ethereal.email',
+                    pass: 'pDyGKT7kE4JYp3QKya'
+                }
+            });
     }
-    async sendEmail(mailOptions)
+    async sendEmail(mailOptions) 
     {
         const response = await this.transporter.sendMail(mailOptions)
 
@@ -34,27 +34,26 @@ class ISFT151Mailer
     }
 };
 
-/* data structure for send mails
+/* data structure for send mails */
 
-    let mailOptions = 
-    {
-        from: 'sofia.dubuque@ethereal.email',
-        to: 'jevon.kautzer@ethereal.email',
-        subject: 'Test MailerController',
-        text: 'Prueba de envio por fuera',
-        attachments: //an object for each files to be send 
+let mailOptions =
+{
+    from: 'thurman.mertz@ethereal.email',
+    to: 'marlee.pollich@ethereal.email',
+    subject: 'Test MailerController',
+    text: 'Prueba de envio por fuera',
+    attachments: //an object for each files to be send 
         [
             {
-                filename: 'FichaMedica.pdf',
-                path: 'C:/Users/PC/Downloads/ficha_medica.pdf',
-                contentType: 'application/pdf'
-            },
-            {
-                filename: 'image.pdf',
-                path: 'C:/Users/PC/Downloads/Image_PD.pdf',
+                filename: 'api-specification.pdf',
+                path: '../MailResources/api-specification.pdf',
                 contentType: 'application/pdf'
             }
-        ],
-    }
-*/
-module.exports = { ISFT151Mailer }
+        ]
+}
+
+const mailer = new ISFT151Mailer();
+
+mailer.sendEmail(mailOptions);
+
+module.exports = { ISFT151Mailer };
