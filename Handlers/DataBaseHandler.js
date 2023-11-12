@@ -1,9 +1,9 @@
 const mysql         = require('mysql');
 const fs            = require('fs').promises;
-const { parseYAML } = require('../Configurations/parseYAML.js');
+const { parseYAML } = require('../Configurations/ParseYAML.js');
 
 class DataBaseHandler {
-  constructor(configFilePath = '../Configurations/parameters.yml') {
+  constructor(configFilePath = './Configurations/parameters.yml') {
     this.configFilePath = configFilePath;
     this.configData     = null;
     this.__connection   = null;
@@ -46,11 +46,15 @@ class DataBaseHandler {
   }
 
   executeStoreProcedure(name, data) {
+    if (!this.__connection) {
+      throw new Error('Database connection not established. Call connect() first.');
+    }
+  
     const queryParams = Object.values(data)
       .map((value) => `'${value}'`)
       .join(", ");
     const query = `CALL ${name}(${queryParams})`;
-
+  
     return new Promise((resolve, reject) => {
       this.__connection.query(query, (error, results, fields) => {
         if (error) {
@@ -63,7 +67,7 @@ class DataBaseHandler {
       });
     });
   }
-
+  
   close() {
     return new Promise((resolve, reject) => {
       if (this.__connection) {

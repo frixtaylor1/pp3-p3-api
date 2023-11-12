@@ -62,7 +62,6 @@ class StateMachine
     }
 
     this.currentState = newState;
-    console.log(`Estado actual: ${this.currentState}`);
   }
 
   /**

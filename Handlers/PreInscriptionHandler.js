@@ -1,22 +1,24 @@
-const { UserHandler }       = require('./UserHandler.js');
-const { MajorHandler }      = require('./MajorHandler.js');
-const { dataBaseHandler }   = require('./DataBaseHandler.js');
-const { parseYAML }         = require('../Configurations/parseYAML.js');
-const { StateMachine }      = require('./StateMachine.js'); 
-const { ISFT151Mailer }      = require('./MailerHandler.js'); 
-const fs                    = require('fs').promises;
+const fs                  = require('fs').promises;
+const { parseYAML }       = require('../Configurations/ParseYAML.js');
 
-/**
- * @todo Integrar la finit state machine en el preinscription handler...
- */
-class PreInscriptionHandler 
-{
-  constructor(dbHandler,mailer = new ISFT151Mailer()) 
-  {
+const { StateMachine }    = require('./StateMachine.js');
+const { ISFT151Mailer }   = require('./MailerHandler.js');
+const { dataBaseHandler } = require('./DataBaseHandler.js');
+
+class PreInscriptionHandler {
+  constructor(dbHandler = dataBaseHandler, mailer = new ISFT151Mailer()) {
     this.dbHandler        = dbHandler;
-    this.fsm              = new StateMachine();
+    this._fsm             = new StateMachine();
     this.nbPreinscription = 0;
     this.mailer           = mailer;
+  }
+
+  set fsm(obj) {
+    this._fsm = obj;
+  }
+
+  get fsm() {
+    return this._fsm;
   }
 
   /**
@@ -25,8 +27,7 @@ class PreInscriptionHandler
    * @param object data // iduser, idmajor
    * @return object
    **/
-  async create(data) 
-  {
+  async create(data) {
     let results = {};
 
     results = await this.dbHandler.executeStoreProcedure('usp_create_preinscription', data);
@@ -40,8 +41,7 @@ class PreInscriptionHandler
    * @param object data // idpreinscription
    * @return object
    **/
-  async remove(data) 
-  {
+  async remove(data) {
     let results = {};
 
     results = await this.dbHandler.executeStoreProcedure('usp_remove_preinscription', data);
@@ -55,8 +55,7 @@ class PreInscriptionHandler
    * @param object data // idpreinscription
    * @return object
    **/
-  async read(data) 
-  {
+  async read(data) {
     let results = {};
 
     results = await this.dbHandler.executeStoreProcedure('usp_read_preinscription', data);
@@ -70,8 +69,7 @@ class PreInscriptionHandler
    * @param object data // state
    * @return object
    **/
-  async update(data) 
-  {
+  async update(data) {
     let results = {};
 
     results = await this.dbHandler.executeStoreProcedure('usp_update_preinscription', data);
@@ -79,237 +77,60 @@ class PreInscriptionHandler
     return results;
   }
 
-  /**
-   * @brief Inicia el proceso de inscripcion...
-   * 
-   * @apidoc `/startPreinscription`
-   * @method  HTTP:POST 
-   * 
-   * @param  {JSON} requestData
-   * @param  {Callable} responseCallback
-   * @return  {JSON}
-   **/
-  async startPreinscription(requestData, responseCallback) 
-  {
-    const getCurrentDate = require('../Utils/Date.js');
-    
-    let results = {};
-    let data = requestData.data;
-
-    try 
-    {
-      await this.dbHandler.loadConfig();
-      await this.dbHandler.connect();
-      
-      this.fsm.changeState('preinscription_on_proc');
-
-      let startPreinscription = {
-        id_user             : data.id_user,
-        id_major            : data.id_major,
-        preinscription_date : getCurrentDate('es-AR'),
-        state               : this.fsm.getCurrentState(),
-      };
-
-      results = await this.create(startPreinscription);
-
-      responseCallback(200, results[0]);
-
-      console.log('Hello, World!');
-    } 
-    catch (error) 
-    {
-      console.error('Error:', error);
-    } 
-    finally 
-    {
-      await this.dbHandler.close();
-    }
-
-    return results;
-  }
-
-  /**
-   * @brief Confirma la Preinscripcion...
-   * 
-   * @apidoc /confirmPreinscription
-   * @method  HTTP:POST 
-   * 
-   * @param   object data // id_user, id_preinscription, name, surname, dni, birthdate, email
-   * @return  object
-   **/
-  async confirmPreinscription(data) 
-  {
-    let results       = {};
-    let userHandler   = new UserHandler(this.dbHandler);
-    let majorHanlder  = new MajorHandler(this.dbHandler);
-
-    // Actualizo los datos del usuario al confirmar la inscripcion...
-    let userData = {
-      id        : data.id_user,
-      name      : data.name,
-      surname   : data.surname,
-      dni       : data.dni,
-      birthdate : data.birthdate,
-      email     : data.email,
-    };
-
-    await this.dbHandler.loadConfig();
-    await this.dbHandler.connect();
-
-    results[0] = await userHandler.update(userData);
-
-    let preinscriptionObj = {
-      id_preinsciption: data.id_preinscription,
-      state: undefined
-    };
-    let majorData = {};
-    let preInscriptionHandler  = new PreInscriptionHandler(this.dbHandler);
-    
-    preInscriptionHandler.read({id_preinsciption: preinscriptionObj.id_preinsciption}).then(res => {
-      majorData = majorHanlder.read({id_major: res[0][0].id_major});
-    });
- 
-    this.nbPreinscription++;
- 
-    if (this.nbPreinscription >= majorData.capacity) 
-    {
-      this.fsm.changeState('preinscription_in_list');
-      preinscriptionObj.state = this.fsm.getCurrentState();
-
- 
-      let mailOptions =
-      { 
-        from: 'sofia.dubuque@ethereal.email',
-        to: 'jevon.kautzer@ethereal.email',
-        subject: 'Preinscipción en lista de espera',
-        text: 'Tu preinscipción esta en lista de espera,nos comunicaremos contigo cuando se haya liberado lugar',
-        attachments: //an object for each files to be send 
-          [
-            {
-              filename: 'api-specification.pdf',
-              path: '../MailResources/api-specification.pdf',
-              contentType: 'application/pdf'
-            }
-          ],
-      }
-    } 
-    else 
-    {
-      this.fsm.changeState('preinscript');
-      preinscriptionObj.state = this.fsm.getCurrentState();
-
-      let mailOptions =
-      { 
-        from: 'sofia.dubuque@ethereal.email',
-        to: 'jevon.kautzer@ethereal.email',
-        subject: 'Preinscipción aprobada',
-        text: 'Tu preinscipción ha sido aprobada',
-        attachments: //an object for each files to be send 
-          [
-            {
-              filename: 'api-specification.pdf',
-              path: '../MailResources/api-specification.pdf',
-              contentType: 'application/pdf'
-            }
-          ],
-      }
-    }
-    results[1] = await this.dbHandler.executeStoreProcedure('usp_change_state_preinscription', preinscriptionObj);
-    
-    await this.dbHandler.close();
-    return results;
-  }
-
-  /**
-   * @brief Cancela una Preinscripcion...
-   * 
-   * @apidoc /cancelPreinscription
-   * @method  HTTP:POST 
-   * 
-   * @param   object data // idpreinscription
-   * @return  object
-   **/
-  async cancelPreinscription(data)
-  {
-    let results = {};
-
-    await this.dbHandler.loadConfig();
-    await this.dbHandler.connect();
-
-    this.fsm.changeState('annulled');
-    data.preinscriprionState = this.fsm.getCurrentState();
-    results[1] = await this.dbHandler.executeStoreProcedure('usp_change_state_preinscription', data);
-
-    await this.dbHandler.close();
-
-    let mailOptions =
-    { 
-      from: 'sofia.dubuque@ethereal.email',
-      to: 'jevon.kautzer@ethereal.email',
-      subject: 'Preinscipción cancelada',
-      text: 'Tu preinscipción ha sido cancelada',
-      attachments: //an object for each files to be send 
-        [
-          {
-            filename: 'api-specification.pdf',
-            path: '../MailResources/api-specification.pdf',
-            contentType: 'application/pdf'
-          }
-        ],
-    }
-
-    return results;
-  }
-
-  async __loadStateTransitions(configFilePath) 
-  {
+  async __loadStateTransitions(configFilePath) {
     let parameters;
-    try 
-    {
-      console.log('configFilePath>>> ' + configFilePath )
+    try {
+      const yamlString = await fs.readFile(configFilePath, 'utf8');
+      parameters = await parseYAML(yamlString);
 
-      const yamlString  = await fs.readFile(configFilePath, 'utf8');
-      console.log('yamlString>>> ' + yamlString )
-
-      parameters        = await parseYAML(yamlString);
-
-    } catch (error) 
-    {
+    } catch (error) {
       console.error('Error loading config:', error.message);
     }
-    console.log('parameters>>> ' + parameters )
+
     let states = parameters.states_machine.states;
 
-    console.log(states);
-
-    if (states) 
-    {
+    if (states) {
       const parsedStates = states.split(', ').map(value => value.trim());
-        for (const state of parsedStates) {
-          this.fsm.addState(state);
-        }
+      for (const state of parsedStates) {
+        this._fsm.addState(state);
+      }
     }
 
     let transitions = parameters.state_machine_transitions;
 
-    if (transitions) 
-    {
+    if (transitions) {
       for (const state in transitions) {
         if (transitions.hasOwnProperty(state)) {
           const values = transitions[state].split(', ').map(value => value.trim());
           for (const transition of values) {
-            this.fsm.addTransition(state, transition);
+            this._fsm.addTransition(state, transition);
           }
         }
       }
     }
   }
+  changeState(state) {
+    this.fsm.changeState(state);
+  }
+
+  showTransitions() {
+    this.fsm.showTransitions();
+  }
+
+  getCurrentState() {
+    this.fsm.getCurrentState();
+  }
 }
 
-let preinscriptionHanlder = new PreInscriptionHandler(dataBaseHandler);
+let preinscriptionHandler = new PreInscriptionHandler();
 
-preinscriptionHanlder.__loadStateTransitions('./Configurations/parameters.yml');
+preinscriptionHandler.__loadStateTransitions('./Configurations/parameters.yml');
+setTimeout(() => {
+  preinscriptionHandler.fsm.changeState('void');
+  preinscriptionHandler.fsm.showTransitions();
+}, 100);
 
+/*
 setTimeout(() => {
   preinscriptionHanlder.fsm.changeState('void');
   preinscriptionHanlder.fsm.showTransitions();
@@ -327,9 +148,10 @@ let preinscriptionData = {
 };
 preinscriptionHanlder.confirmPreinscription(preinscriptionData).then(res => {
   console.log(res);
-});
+}); */
 // preinscriptionHanlder.cancelPreinscription({user_id: 1,id_major: 1,preinscriptionState: undefined}).then(res => {
 //   console.log(res);
 // });
 
-module.exports = { PreInscriptionHandler };
+
+module.exports = { preinscriptionHandler };

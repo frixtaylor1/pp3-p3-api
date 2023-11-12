@@ -35,7 +35,7 @@ class ISFT151Mailer
 };
 
 /* data structure for send mails */
-
+/* 
 let mailOptions =
 {
     from: 'thurman.mertz@ethereal.email',
@@ -46,7 +46,7 @@ let mailOptions =
         [
             {
                 filename: 'api-specification.pdf',
-                path: '../MailResources/api-specification.pdf',
+                path: './MailResources/api-specification.pdf',
                 contentType: 'application/pdf'
             }
         ]
@@ -54,6 +54,6 @@ let mailOptions =
 
 const mailer = new ISFT151Mailer();
 
-mailer.sendEmail(mailOptions);
+mailer.sendEmail(mailOptions); */
 
 module.exports = { ISFT151Mailer };

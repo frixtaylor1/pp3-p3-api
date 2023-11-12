@@ -1,5 +1,7 @@
 const { PreInscriptionHandler } = require('../Handlers/PreInscriptionHandler.js');
 const dataBaseHandler = require('../Handlers/DataBaseHandler.js');
+const { UserHandler } = require('../Handlers/UserHandler.js');
+const { APIPreinscription } = require('../Handlers/APIPreinscription.js');
 
 
 /**
@@ -8,28 +10,35 @@ const dataBaseHandler = require('../Handlers/DataBaseHandler.js');
  * @param {Server} api 
  **/
 module.exports = function routes(api) {
-  const preinscriptionHandler = new PreInscriptionHandler(dataBaseHandler);
+  const apiPreinscription = new APIPreinscription(dataBaseHandler);
+
   /**
    * @API_TEST Prueba para la api...
    */
-  api.get('/greet', greet);
+  api.post('/greet', greet);
 
   /**
-   * @API_METHODS   
+   * @API_METHODS_PREINSCRIPTION_AVAILABLE   
    */ 
-  api.post('/startPreInscription', preinscriptionHandler.startPreinscription);
+  api.post('/startPreinscription', apiPreinscription.startPreinscription);
 
   /**
-   * @API_METHODS   
+   * @API_METHODS_PREINSCRIPTION_AVAILABLE   
    */ 
-  api.post('/confirmPreinscription', preinscriptionHandler.confirmPreinscription);
+  api.post('/confirmPreinscription', apiPreinscription.confirmPreinscription);
 
   /**
-   * @API_METHODS   
+   * @API_METHODS_PREINSCRIPTION_AVAILABLE   
    */ 
-  api.post('/cancelPreinscription', preinscriptionHandler.cancelPreinscription);
+  api.post('/cancelPreinscription', apiPreinscription.cancelPreinscription);
+
+  /**
+   * @API_METHODS_PREINSCRIPTION_AVAILABLE   
+   */ 
+  api.post('/signUp', apiPreinscription.signUp);
 };
 
 function greet(req, resCallback) {
   resCallback(200, { 'message': 'Hello, World!' });
+  console.log('HELLO; WORLD!'); 
 }

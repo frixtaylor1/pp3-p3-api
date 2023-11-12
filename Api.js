@@ -10,4 +10,4 @@ function start_api()
   api.start(3000);
 }
 
-module.exports = { start_api };
+start_api();

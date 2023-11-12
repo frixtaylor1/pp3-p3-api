@@ -23,6 +23,7 @@ class Server {
     const method  = req.method;
     const url     = req.url;
     const key     = method + ' ' + url;
+    let body      = null;
 
     if (method === 'OPTIONS') {
       this.handleOptions(res);
@@ -36,11 +37,11 @@ class Server {
     }
 
     req.on('data', function (chunk) {
-      body += chunk.toString();
+      body = (body || '') + chunk.toString();
     });
-
+    
     req.on('end', function () {
-      const requestData = body ? JSON.parse(body) : {};
+      const requestData = (body !== null && body !== undefined) ? JSON.parse(body) : {};
       handler(requestData, function (statusCode, responseData) {
         this.sendResponse(res, statusCode, responseData);
       }.bind(this));
