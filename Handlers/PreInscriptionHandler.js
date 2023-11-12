@@ -58,7 +58,11 @@ class PreInscriptionHandler {
   async read(data) {
     let results = {};
 
-    results = await this.dbHandler.executeStoreProcedure('usp_read_preinscription', data);
+    let readObj = {
+      id_preisncription: data.id_preisncription,
+    };
+
+    results = await this.dbHandler.executeStoreProcedure('usp_read_preinscription', readObj);
 
     return results;
   }
@@ -75,6 +79,20 @@ class PreInscriptionHandler {
     results = await this.dbHandler.executeStoreProcedure('usp_update_preinscription', data);
 
     return results;
+  }
+
+  /**
+   * @brief Obtiene la cantidad de preinscripciones a determinada carrera...
+   * 
+   * @param {JSON} data - id_major
+   *
+   * @return {Promise<JSON>}
+   **/
+  async getNbPreinscriptionsByMajorId(data) {
+    let results = await this.dbHandler.executeStoreProcedure('usp_get_nb_of_preiscriptions', data);
+
+    console.log('COUNT (', results, ')');
+    return results[0];
   }
 
   async __loadStateTransitions(configFilePath) {
@@ -109,6 +127,7 @@ class PreInscriptionHandler {
       }
     }
   }
+
   changeState(state) {
     this.fsm.changeState(state);
   }

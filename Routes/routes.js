@@ -1,8 +1,5 @@
-const { PreInscriptionHandler } = require('../Handlers/PreInscriptionHandler.js');
-const dataBaseHandler = require('../Handlers/DataBaseHandler.js');
-const { UserHandler } = require('../Handlers/UserHandler.js');
-const { APIPreinscription } = require('../Handlers/APIPreinscription.js');
-
+const dataBaseHandler           = require('../Handlers/DataBaseHandler.js');
+const { APIPreinscription }     = require('../API/APIPreinscription.js');
 
 /**
  * @brief Asigna los endpoint y sus respectivas callbacks

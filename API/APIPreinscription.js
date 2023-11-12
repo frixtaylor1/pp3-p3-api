@@ -1,7 +1,7 @@
-const { MajorHandler }          = require("./MajorHandler.js");
-const { UserHandler }           = require("./UserHandler.js");
-const { preinscriptionHandler } = require("./PreInscriptionHandler.js");
-const { dataBaseHandler }       = require("./DataBaseHandler.js");
+const { MajorHandler }          = require("../Handlers/MajorHandler.js");
+const { UserHandler }           = require("../Handlers/UserHandler.js");
+const { preinscriptionHandler } = require("../Handlers/PreInscriptionHandler.js");
+const { dataBaseHandler }       = require("../Handlers/DataBaseHandler.js");
 const getCurrentDate            = require('../Utils/Date.js');
 
 
@@ -63,7 +63,7 @@ class APIPreinscription {
    * 
    * @return {JSON}
    **/
-  async confirmPreinscription(data) 
+  async confirmPreinscription(requestData, responseCallback) 
   {
     let results       = {};
     let userHandler   = new UserHandler(dataBaseHandler);
@@ -71,42 +71,40 @@ class APIPreinscription {
 
     // Actualizo los datos del usuario al confirmar la inscripcion...
     let userData = {
-      id        : data.id_user,
-      name      : data.name,
-      surname   : data.surname,
-      dni       : data.dni,
-      birthdate : data.birthdate,
-      email     : data.email,
+      id_user   : requestData.id_user,
+      name      : requestData.name,
+      surname   : requestData.surname,
+      dni       : requestData.dni,
+      birthdate : requestData.birthdate,
+      email     : requestData.email,
     };
 
     await dataBaseHandler.loadConfig();
     await dataBaseHandler.connect();
 
-    results[0] = await userHandler.update(userData);
+    await userHandler.update(userData);
 
     let preinscriptionObj = {
-      id_preinsciption: data.id_preinscription,
-      state: undefined
+      id_preinsciption: requestData.id_preinscription,
+      state           : undefined
     };
-    let majorData = {};
-    let preInscriptionHandler  = new PreInscriptionHandler(dataBaseHandler);
-    
-    preInscriptionHandler.read({id_preinsciption: preinscriptionObj.id_preinsciption}).then(res => {
-      majorData = majorHanlder.read({id_major: res[0][0].id_major});
-    });
+
+    let majorDataInput = {
+      id: requestData.id_major,
+    };
+
+    let majorData          = await majorHanlder.read(majorDataInput);
+    let nbOfPreinscription = await preinscriptionHandler.getNbPreinscriptionsByMajorId(majorDataInput);  
  
-    this.nbPreinscription++;
- 
-    if (this.nbPreinscription >= majorData.capacity) 
+    if (nbOfPreinscription >= majorData.capacity) 
     {
       preinscriptionHandler.changeState('preinscription_in_list');
       preinscriptionObj.state = preinscriptionHandler.getCurrentState();
 
- 
       let mailOptions =
       { 
         from: 'sofia.dubuque@ethereal.email',
-        to: 'jevon.kautzer@ethereal.email',
+        to: 'kevinmusic123@gmail.com',
         subject: 'Preinscipción en lista de espera',
         text: 'Tu preinscipción esta en lista de espera,nos comunicaremos contigo cuando se haya liberado lugar',
         attachments: //an object for each files to be send 
@@ -140,9 +138,11 @@ class APIPreinscription {
           ],
       }
     }
-    results[1] = await dataBaseHandler.executeStoreProcedure('usp_change_state_preinscription', preinscriptionObj);
-    
+    results = await dataBaseHandler.executeStoreProcedure('usp_change_state_preinscription', preinscriptionObj);
+
     await dataBaseHandler.close();
+
+    responseCallback(200, { preinscription_state: preinscriptionObj.state, results });
     return results;
   }
 

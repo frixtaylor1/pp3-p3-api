@@ -38,9 +38,8 @@ class MajorHandler {
      * @return object
      **/
     async read(data) {
-        let results = {};
-
-        results = await this.dbHandler.executeStoreProcedure('usp_read_major', data);
+        let results = await this.dbHandler.executeStoreProcedure('usp_read_major', data);
+        console.log('MAJORDATA>>', results[0]);
 
         return results;
     }
