@@ -33,6 +33,11 @@ module.exports = function routes(api) {
    * @API_METHODS_PREINSCRIPTION_AVAILABLE   
    */ 
   api.post('/signUp', apiPreinscription.signUp);
+
+  /**
+   * @API_METHODS_PREINSCRIPTION_AVAILABLE   
+   */ 
+  api.post('/sendPhoto', apiPreinscription.sendPhoto);
 };
 
 function greet(req, resCallback) {

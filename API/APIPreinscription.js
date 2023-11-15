@@ -1,3 +1,34 @@
+/**
+ * @file APIPreinscription.js
+ * @license GPL-3.0
+ * 
+ * Copyright (c) 2023 Omar Lopez, 
+ *                    Evelyn Flores, 
+ *                    Karen Manchado, 
+ *                    Facundo Caminos, 
+ *                    Ignacio Moreno,
+ *                    Kevin Taylor,
+ *                    Matias Cardenas
+ *                    ISFT N° 151
+ *
+ *  Project Supervisor: Prof. Matias Santiago Gastón
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Year: 2023
+ */
+
 const { MajorHandler }          = require("../Handlers/MajorHandler.js");
 const { UserHandler }           = require("../Handlers/UserHandler.js");
 const { preinscriptionHandler } = require("../Handlers/PreInscriptionHandler.js");
@@ -124,16 +155,16 @@ class APIPreinscription {
 
       let mailOptions =
       { 
-        from: 'sofia.dubuque@ethereal.email',
-        to: 'jevon.kautzer@ethereal.email',
-        subject: 'Preinscipción aprobada',
-        text: 'Tu preinscipción ha sido aprobada',
-        attachments: //an object for each files to be send 
+        from        : 'sofia.dubuque@ethereal.email',
+        to          : 'jevon.kautzer@ethereal.email',
+        subject     : 'Preinscipción aprobada',
+        text        : 'Tu preinscipción ha sido aprobada',
+        attachments :
           [
             {
-              filename: 'api-specification.pdf',
-              path: '../MailResources/api-specification.pdf',
-              contentType: 'application/pdf'
+              filename    : 'api-specification.pdf',
+              path        : '../MailResources/api-specification.pdf',
+              contentType : 'application/pdf'
             }
           ],
       }
@@ -220,6 +251,41 @@ class APIPreinscription {
     } catch (error) {
       console.error(error);
     }
+  }
+
+  /**
+   * @brief Guarda una foto...
+   * 
+   * @apidoc /sendPhoto
+   * @method  HTTP:POST 
+   * 
+   * @param {JSON} requestData
+   * @param {CallableFunction} responseCallback
+   * 
+   * @return {Promise<JSON>}
+   **/
+  async sendPhoto(requestData, responseCallback) {
+    let results = {};
+  
+    try {
+      const userHandler = new UserHandler(dataBaseHandler);
+      await dataBaseHandler.connect();
+  
+      let data = {
+        id_user: requestData.id_user,
+        imageData: requestData.imageData,
+      };
+  
+      results = await userHandler.savePhoto(data);
+      await dataBaseHandler.close();
+    } catch (error) {
+      console.error(error);
+      results = {
+        error: error.message,
+      };
+    }
+  
+    responseCallback(200, results);
   }
 }
 

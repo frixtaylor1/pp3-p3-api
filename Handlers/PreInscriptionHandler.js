@@ -1,3 +1,34 @@
+/**
+ * @file PeInscriptionHandler.js
+ * @license GPL-3.0
+ * 
+ * Copyright (c) 2023 Omar Lopez, 
+ *                    Evelyn Flores, 
+ *                    Karen Manchado, 
+ *                    Facundo Caminos, 
+ *                    Ignacio Moreno,
+ *                    Kevin Taylor,
+ *                    Matias Cardenas
+ *                    ISFT N° 151
+ *
+ *  Project Supervisor: Prof. Matias Santiago Gastón
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
+ *
+ * Year: 2023
+ */
+
 const fs                  = require('fs').promises;
 const { parseYAML }       = require('../Configurations/ParseYAML.js');
 
@@ -148,29 +179,5 @@ setTimeout(() => {
   preinscriptionHandler.fsm.changeState('void');
   preinscriptionHandler.fsm.showTransitions();
 }, 100);
-
-/*
-setTimeout(() => {
-  preinscriptionHanlder.fsm.changeState('void');
-  preinscriptionHanlder.fsm.showTransitions();
-}, 1000);
-
-//  id_user, id_preinscription, name, surname, dni, birthdate, email
-let preinscriptionData = {
-  id_user           : 1,
-  id_preinscription : 1,
-  name              : 'Aldo',
-  surname           : 'Capurro',
-  dni               : '123123123',
-  birthdate         : '1987/12/31',
-  email             : 'aldo@capurro.com', 
-};
-preinscriptionHanlder.confirmPreinscription(preinscriptionData).then(res => {
-  console.log(res);
-}); */
-// preinscriptionHanlder.cancelPreinscription({user_id: 1,id_major: 1,preinscriptionState: undefined}).then(res => {
-//   console.log(res);
-// });
-
 
 module.exports = { preinscriptionHandler };
