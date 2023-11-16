@@ -7,7 +7,7 @@ function start_api()
 
   routes(api);
 
-  api.start(3300);
+  api.start(3000);
 }
 
 start_api();

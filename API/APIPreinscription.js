@@ -3,12 +3,13 @@
  * @license GPL-3.0
  * 
  * Copyright (c) 2023 Omar Lopez, 
- *                    Evelyn Flores, 
+ *                    Evelyn Oliva, 
  *                    Karen Manchado, 
  *                    Facundo Caminos, 
  *                    Ignacio Moreno,
  *                    Kevin Taylor,
  *                    Matias Cardenas
+ *                    Daniel Beinat
  *                    ISFT N° 151
  *
  *  Project Supervisor: Prof. Matias Santiago Gastón
@@ -31,8 +32,8 @@
 
 const { MajorHandler }          = require("../Handlers/MajorHandler.js");
 const { UserHandler }           = require("../Handlers/UserHandler.js");
-const { ISFT151Mailer }          = require("../Handlers/MailerHandler.js");
-const { PDFHandler }           = require("../Handlers/PDFHandler.js");
+const { ISFT151Mailer }         = require("../Handlers/MailerHandler.js");
+const { PDFHandler }            = require("../Handlers/PDFHandler.js");
 const { preinscriptionHandler } = require("../Handlers/PreInscriptionHandler.js");
 const { dataBaseHandler }       = require("../Handlers/DataBaseHandler.js");
 const getCurrentDate            = require('../Utils/Date.js');
@@ -117,7 +118,7 @@ class APIPreinscription
       email     : requestData.email,
     };
 
-    generatePDF(requestData.id_user,requestData);
+    generateFile(requestData.id_user, requestData);
 
     await dataBaseHandler.loadConfig();
     await dataBaseHandler.connect();
@@ -138,8 +139,7 @@ class APIPreinscription
  
     if (nbOfPreinscription >= majorData.capacity) 
     {
-      preinscriptionHandler.changeState('preinscription_in_list');
-      preinscriptionObj.state = preinscriptionHandler.getCurrentState();
+      preinscriptionHandler.fsm.changeState('preinscription_in_list');
 
       let mailOptions =
       { 
@@ -161,8 +161,7 @@ class APIPreinscription
     } 
     else 
     {
-      preinscriptionHandler.changeState('preinscript');
-      preinscriptionObj.state = preinscriptionHandler.getCurrentState();
+      preinscriptionHandler.fsm.changeState('preinscript');
 
       let mailOptions =
       { 
@@ -173,7 +172,7 @@ class APIPreinscription
         attachments :
           [
             {
-              filename    : 'StudentData.pdf',
+              filename    : `${requestData.id_user}.pdf`,
               path        : `./MailResources/${requestData.id_user}.pdf`,
               contentType : 'application/pdf'
             }
@@ -182,6 +181,9 @@ class APIPreinscription
 
       sendEmail(mailOptions);
     }
+    
+    preinscriptionObj.state = preinscriptionHandler.getCurrentState();
+
     results = await dataBaseHandler.executeStoreProcedure('usp_change_state_preinscription', preinscriptionObj);
 
     await dataBaseHandler.close();
@@ -323,7 +325,7 @@ class APIPreinscription
    * 
    * @return {void}
    **/
-  function generatePDF(filename,data)
+  function generateFile(filename,data)
   {
     let pdfHandler = new PDFHandler();
 

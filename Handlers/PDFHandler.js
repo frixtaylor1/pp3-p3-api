@@ -3,12 +3,13 @@
  * @license GPL-3.0
  * 
  * Copyright (c) 2023 Omar Lopez, 
- *                    Evelyn Flores, 
+ *                    Evelyn Oliva, 
  *                    Karen Manchado, 
  *                    Facundo Caminos, 
  *                    Ignacio Moreno,
  *                    Kevin Taylor,
  *                    Matias Cardenas
+ *                    Daniel Beinat
  *                    ISFT N° 151
  *
  *  Project Supervisor: Prof. Matias Santiago Gastón
@@ -63,6 +64,7 @@ class PDFHandler
     await browser.close();
 
   }
+  
     /**
    * @brief Genera contenido HTML estructurado a partir de un objeto...
    * 
@@ -120,23 +122,5 @@ class PDFHandler
     return contenidoHtml;
   }
 }
-
-// // // Ejemplo de uso
-// let pdfHandler = new PDFHandler();
-
-// // Datos de ejemplo (puedes obtener estos datos de una API, una base de datos, etc.)
-// const datos =
-//   {
-//     nombre          : 'Omar',
-//     carrera         : 'Sistemas',
-//     email           : 'Omar@gmail.com',
-//     foto            : null,
-//     apellido        : 'Lopez',
-//     dni             : '32132132',
-//     fechaNacimiento : '12/12/2002',
-//     telefono        : 32321323213,
-//   }
-
-// pdfHandler.generatePDF(321321321,datos);
 
 module.exports = { PDFHandler }

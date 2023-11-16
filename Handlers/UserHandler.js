@@ -3,12 +3,13 @@
  * @license GPL-3.0
  * 
  * Copyright (c) 2023 Omar Lopez, 
- *                    Evelyn Flores, 
+ *                    Evelyn Oliva, 
  *                    Karen Manchado, 
  *                    Facundo Caminos, 
  *                    Ignacio Moreno,
  *                    Kevin Taylor,
  *                    Matias Cardenas
+ *                    Daniel Beinat
  *                    ISFT N° 151
  *
  *  Project Supervisor: Prof. Matias Santiago Gastón
