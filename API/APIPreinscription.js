@@ -100,13 +100,16 @@ class APIPreinscription {
     let userHandler   = new UserHandler(dataBaseHandler);
     let majorHanlder  = new MajorHandler(dataBaseHandler);
 
+    let birthData = requestData.birthdate.split('-');
+    let birthDate = birthData[2] + '-' + birthData[1] + '-' + birthData[0];
+
     // Actualizo los datos del usuario al confirmar la inscripcion...
     let userData = {
       id_user   : requestData.id_user,
       name      : requestData.name,
       surname   : requestData.surname,
       dni       : requestData.dni,
-      birthdate : requestData.birthdate,
+      birthdate : birthDate,
       email     : requestData.email,
     };
 
@@ -277,7 +280,6 @@ class APIPreinscription {
       };
   
       results = await userHandler.savePhoto(data);
-      await dataBaseHandler.close();
     } catch (error) {
       console.error(error);
       results = {
