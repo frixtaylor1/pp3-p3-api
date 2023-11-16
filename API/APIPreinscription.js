@@ -31,12 +31,16 @@
 
 const { MajorHandler }          = require("../Handlers/MajorHandler.js");
 const { UserHandler }           = require("../Handlers/UserHandler.js");
+const { ISFT151Mailer }          = require("../Handlers/MailerHandler.js");
+const { PDFHandler }           = require("../Handlers/PDFHandler.js");
 const { preinscriptionHandler } = require("../Handlers/PreInscriptionHandler.js");
 const { dataBaseHandler }       = require("../Handlers/DataBaseHandler.js");
 const getCurrentDate            = require('../Utils/Date.js');
 
 
-class APIPreinscription {
+
+class APIPreinscription 
+{
   /**
    * @brief Inicia el proceso de inscripcion...
    * 
@@ -113,6 +117,8 @@ class APIPreinscription {
       email     : requestData.email,
     };
 
+    generatePDF(requestData.id_user,requestData);
+
     await dataBaseHandler.loadConfig();
     await dataBaseHandler.connect();
 
@@ -137,19 +143,21 @@ class APIPreinscription {
 
       let mailOptions =
       { 
-        from: 'sofia.dubuque@ethereal.email',
-        to: 'kevinmusic123@gmail.com',
+        from: 'connor.nolan68@ethereal.email',
+        to: 'name.fadel@ethereal.email',
         subject: 'Preinscipción en lista de espera',
         text: 'Tu preinscipción esta en lista de espera,nos comunicaremos contigo cuando se haya liberado lugar',
         attachments: //an object for each files to be send 
           [
             {
-              filename: 'api-specification.pdf',
-              path: '../MailResources/api-specification.pdf',
+              filename: 'StudentData.pdf',
+              path: `./MailResources/${requestData.id_user}.pdf`,
               contentType: 'application/pdf'
             }
           ],
       }
+
+      sendEmail(mailOptions);
     } 
     else 
     {
@@ -158,19 +166,21 @@ class APIPreinscription {
 
       let mailOptions =
       { 
-        from        : 'sofia.dubuque@ethereal.email',
-        to          : 'jevon.kautzer@ethereal.email',
+        from        : 'connor.nolan68@ethereal.email',
+        to          : 'name.fadel@ethereal.email',
         subject     : 'Preinscipción aprobada',
         text        : 'Tu preinscipción ha sido aprobada',
         attachments :
           [
             {
-              filename    : 'api-specification.pdf',
-              path        : '../MailResources/api-specification.pdf',
+              filename    : 'StudentData.pdf',
+              path        : `./MailResources/${requestData.id_user}.pdf`,
               contentType : 'application/pdf'
             }
           ],
       }
+
+      sendEmail(mailOptions);
     }
     results = await dataBaseHandler.executeStoreProcedure('usp_change_state_preinscription', preinscriptionObj);
 
@@ -212,7 +222,7 @@ class APIPreinscription {
         [
           {
             filename: 'api-specification.pdf',
-            path: '../MailResources/api-specification.pdf',
+            path: './MailResources/api-specification.pdf',
             contentType: 'application/pdf'
           }
         ],
@@ -291,4 +301,32 @@ class APIPreinscription {
   }
 }
 
+  /**
+   * @brief Envia un mail...
+   * 
+   * @param {Object} mailOptions
+   * 
+   * @return {void}
+   **/
+  function sendEmail(mailOptions)
+  {
+    let Mailer = new ISFT151Mailer();
+
+    Mailer.sendEmail(mailOptions);
+  }
+  /**
+   * @brief Genera un archivo PDF...
+   * 
+   * @param {string} filename
+   * 
+   * @param {Object} data
+   * 
+   * @return {void}
+   **/
+  function generatePDF(filename,data)
+  {
+    let pdfHandler = new PDFHandler();
+
+    pdfHandler.generatePDF(filename,data);
+  }
 module.exports = { APIPreinscription };

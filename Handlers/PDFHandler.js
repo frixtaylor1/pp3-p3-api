@@ -36,21 +36,107 @@ class PDFHandler
   constructor()
   {
     this.format = "A4";
-    this.path = "./testPDF.pdf";
+    this.path = "./MailResources/";
   }
-  async generatePDF(htmlContent)
+
+    /**
+   * @brief Genera archivo PDF con los datos de preinscripcion del estudiante...
+   * 
+   * @param {object} data 
+   * 
+   * @param {string} filename 
+   * 
+   * @return {void}
+   **/
+  async generatePDF(filename,data)
   {
+    let htmlContent = this.#parseToHTMLContent(data);
+    
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
     await page.setContent(htmlContent);
 
     // Generar el PDF
-    await page.pdf({ path: this.path , format: this.format });
+    await page.pdf({ path: `${this.path}${filename}.pdf` , format: this.format });
 
     await browser.close();
 
   }
+    /**
+   * @brief Genera contenido HTML estructurado a partir de un objeto...
+   * 
+   * @param {object} data 
+   * 
+   * @return {string} HTMLContent
+   **/
+  #parseToHTMLContent(data)
+  {
+    const contenidoHtml = `
+    <!DOCTYPE html>
+    <html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Información del Estudiante</title>
+        <style>
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f2;
+            }
+        </style>
+    </head>
+    <body>
+    
+        <h1>Información del Estudiante</h1>
+    
+        <table>
+            <tr>
+                <th>Atributo</th>
+                <th>Valor</th>
+            </tr>
+            ${Object.entries(data)
+              .map(([atributo, valor]) => `
+                <tr>
+                    <td>${atributo}</td>
+                    <td>${valor}</td>
+                </tr>
+              `)
+              .join('')}
+        </table>
+    
+    </body>
+    </html>`;
+
+    return contenidoHtml;
+  }
 }
+
+// // // Ejemplo de uso
+// let pdfHandler = new PDFHandler();
+
+// // Datos de ejemplo (puedes obtener estos datos de una API, una base de datos, etc.)
+// const datos =
+//   {
+//     nombre          : 'Omar',
+//     carrera         : 'Sistemas',
+//     email           : 'Omar@gmail.com',
+//     foto            : null,
+//     apellido        : 'Lopez',
+//     dni             : '32132132',
+//     fechaNacimiento : '12/12/2002',
+//     telefono        : 32321323213,
+//   }
+
+// pdfHandler.generatePDF(321321321,datos);
 
 module.exports = { PDFHandler }
