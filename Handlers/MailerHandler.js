@@ -49,8 +49,8 @@ class ISFT151Mailer
                 secure: false, // true for 465, false for other ports
                 auth:
                 {
-                    user: 'thurman.mertz@ethereal.email',
-                    pass: 'pDyGKT7kE4JYp3QKya'
+                    user: 'connor.nolan68@ethereal.email',
+                    pass: 'f9erNJkeUZFh3KE8Nx'
                 }
             });
     }
