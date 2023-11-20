@@ -30,97 +30,50 @@
  * Year: 2023
  */
 
-const puppeteer = require("puppeteer");
+const fs = require('fs');
+const PDFDocumentWithTables = require('pdfkit-table');
 
-class PDFHandler
-{
-  constructor()
-  {
-    this.format = "A4";
-    this.path = "./MailResources/";
+class PDFHandler {
+  constructor() {
+    this.path = './MailResources/';
   }
 
-    /**
-   * @brief Genera archivo PDF con los datos de preinscripcion del estudiante...
-   * 
-   * @param {object} data 
-   * 
-   * @param {string} filename 
-   * 
-   * @return {void}
-   **/
-  async generatePDF(filename,data)
-  {
-    let htmlContent = this.#parseToHTMLContent(data);
-    
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+  /**
+   * Genera un archivo PDF con el nombre de archivo como id_user.
+   *
+   * @param {string} filename - El nombre del archivo PDF que se generará.
+   * @param {object} data - Los datos utilizados para poblar el archivo PDF.
+   */
+  generatePDF(filename, data) {
+    const writeStream = fs.createWriteStream(`${this.path}${filename}.pdf`);
+    const pdfDoc = new PDFDocumentWithTables();
 
-    await page.setContent(htmlContent);
+    pdfDoc.pipe(writeStream);
 
-    // Generar el PDF
-    await page.pdf({ path: `${this.path}${filename}.pdf` , format: this.format });
+    const tableData = {
+      headers: ['Parametros', 'Tus Datos'],
+      rows: [
+        ['id de usuario', data.id_user],
+        ['id de carrera', data.id_major],
+        ['id de preinscripción', data.id_preinscription],
+        ['nombre', data.name],
+        ['apellido', data.surname],
+        ['dni', data.dni],
+        ['fecha de nacimiento', data.birthdate],
+        ['email', data.email]
+      ]
+    };
 
-    await browser.close();
+    const options = {
+      prepareHeader: () => pdfDoc.font('Helvetica-Bold'),
+      prepareRow: (row, i) => pdfDoc.font('Helvetica').fontSize(12)
+    };
 
-  }
-  
-    /**
-   * @brief Genera contenido HTML estructurado a partir de un objeto...
-   * 
-   * @param {object} data 
-   * 
-   * @return {string} HTMLContent
-   **/
-  #parseToHTMLContent(data)
-  {
-    const contenidoHtml = `
-    <!DOCTYPE html>
-    <html lang="es">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Información del Estudiante</title>
-        <style>
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-            }
-            th, td {
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: left;
-            }
-            th {
-                background-color: #f2f2f2;
-            }
-        </style>
-    </head>
-    <body>
-    
-        <h1>Información del Estudiante</h1>
-    
-        <table>
-            <tr>
-                <th>Atributo</th>
-                <th>Valor</th>
-            </tr>
-            ${Object.entries(data)
-              .map(([atributo, valor]) => `
-                <tr>
-                    <td>${atributo}</td>
-                    <td>${valor}</td>
-                </tr>
-              `)
-              .join('')}
-        </table>
-    
-    </body>
-    </html>`;
+    pdfDoc.table(tableData, options);
 
-    return contenidoHtml;
+    pdfDoc.end();
+    console.log(`PDF generado y guardado en: ${this.path}${filename}.pdf`);
   }
 }
 
-module.exports = { PDFHandler }
+module.exports = { PDFHandler };
